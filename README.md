@@ -178,6 +178,23 @@ const bestBlock = consensusStatus.bestBlock;
 ...
 ```
 
+## getNodeInfo
+Retrieves information about the connected node.
+```js
+const nodeInfo: NodeInfo = await client.getNodeInfo();
+const nodeId = nodeInfo.nodeId;
+...
+```
+
+## getCryptographicParameters
+Retrives the cryptographic parameters at a specific block. The parameters are versioned.
+```js
+const blockHash = "7f7409679e53875567e2ae812c9fcefe90ced8761d08554756f42bf268a42749";
+const cryptographicParameters: CryptographicParameters = await client.getCryptographicParameters(blockHash);
+const genesisString = cryptographicParameters.genesisString;
+...
+```
+
 # Build
 
 ## Building for a release

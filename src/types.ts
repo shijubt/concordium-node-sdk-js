@@ -471,3 +471,30 @@ export interface AccountTransaction {
 
 export type CredentialSignature = Record<number, string>;
 export type AccountTransactionSignature = Record<number, CredentialSignature>;
+
+export interface Global {
+    onChainCommitmentKey: string;
+    bulletproofGenerators: string;
+    genesisString: string;
+}
+
+export type CryptographicParameters = Versioned<Global>;
+
+export enum IsInBakingCommittee {
+    NOT_IN_COMMITTEE = 0,
+    ADDED_BUT_NOT_ACTIVE_IN_COMMITTEE = 1,
+    ADDED_BUT_WRONG_KEYS = 2,
+    ACTIVE_IN_COMMITTEE = 3,
+}
+
+export interface NodeInfo {
+    nodeId?: string;
+    currentLocaltime: Date;
+    peerType: string;
+    consensusBakerRunning: boolean;
+    consensusRunning: boolean;
+    consensusType: string;
+    consensusBakerCommittee: IsInBakingCommittee;
+    consensusFinalizerCommittee: boolean;
+    consensusBakerId?: bigint;
+}

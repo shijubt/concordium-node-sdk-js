@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BoolResponse, JsonResponse } from '../grpc/concordium_p2p_rpc_pb';
-import { AccountTransactionSignature } from './types';
+import { BoolResponse, JsonResponse, NodeInfoResponse } from '../grpc/concordium_p2p_rpc_pb';
+import { AccountTransactionSignature, NodeInfo } from './types';
 
 /**
  * Replaces a number in a JSON string with the same number as a
@@ -40,6 +40,26 @@ export function intToStringTransformer(
  */
 export function unwrapBoolResponse(serializedResponse: Uint8Array): boolean {
     return BoolResponse.deserializeBinary(serializedResponse).getValue();
+}
+
+/**
+ * Unwraps a serialized nodeInfo response to the corresponding NodeInfo object
+ */
+export function unwrapNodeInfoResponse(serializedResponse: Uint8Array): NodeInfo {
+    const nodeInfoResponse = NodeInfoResponse.deserializeBinary(serializedResponse);
+    const bakerId = nodeInfoResponse.getConsensusBakerId();
+    return {
+        nodeId: nodeInfoResponse.getNodeId()?.getValue(),
+        currentLocaltime: new Date(1000 * parseInt(nodeInfoResponse.getCurrentLocaltime(), 10)),
+        peerType: nodeInfoResponse.getPeerType(),
+        consensusBakerRunning: nodeInfoResponse.getConsensusBakerRunning(),
+        consensusRunning: nodeInfoResponse.getConsensusRunning(),
+        consensusType: nodeInfoResponse.getConsensusType(),
+        consensusBakerCommittee: nodeInfoResponse.getConsensusBakerCommittee(),
+        consensusFinalizerCommittee: nodeInfoResponse.getConsensusFinalizerCommittee(),
+        // TODO: avoid getValue(): number, which results in lossy conversion for high numbers
+        consensusBakerId: bakerId ? BigInt(bakerId.getValue()): undefined,
+    }
 }
 
 /**

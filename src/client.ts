@@ -32,6 +32,8 @@ import {
     TransactionSummary,
     TransferredEvent,
     UpdateQueue,
+    CryptographicParameters,
+    NodeInfo
 } from './types';
 import {
     buildJsonResponseReviver,
@@ -39,6 +41,7 @@ import {
     isValidHash,
     unwrapBoolResponse,
     unwrapJsonResponse,
+    unwrapNodeInfoResponse
 } from './util';
 
 /**
@@ -388,6 +391,40 @@ export default class ConcordiumNodeClient {
 
         return consensusStatus;
     }
+
+    /**
+     * Retrieves the cryptographic parameters from the node.
+     * @param blockHash the block to get information about
+     * @returns the cryptographic parameters at the given block, or null if the block does not exist
+     */
+    async getCryptographicParameters(blockHash: string): Promise<CryptographicParameters | undefined> {
+        if (!isValidHash(blockHash)) {
+            throw new Error('The input was not a valid hash: ' + blockHash);
+        }
+
+        const blockHashObject = new BlockHash();
+        blockHashObject.setBlockHash(blockHash);
+        const response = await this.sendRequest(
+            this.client.getCryptographicParameters,
+            blockHashObject
+        );
+
+        return unwrapJsonResponse<CryptographicParameters>(response);
+    }
+
+        /**
+     * Retrieves the consensus status information from the node. Note that the optional
+     * fields will only be unavailable for a newly started node that has not processed
+     * enough data yet.
+     */
+    async getNodeInfo() {
+        const response = await this.sendRequest(
+            this.client.nodeInfo,
+            new Empty()
+        );
+        return unwrapNodeInfoResponse(response);
+    }
+
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     sendRequest<T>(command: any, input: T): Promise<Uint8Array> {

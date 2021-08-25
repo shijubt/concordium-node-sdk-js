@@ -3,6 +3,7 @@ import ConcordiumNodeClient from '../src/client';
 import { ConsensusStatus, NormalAccountCredential } from '../src/types';
 import { AccountAddress } from '../src/types/accountAddress';
 import { isHex } from '../src/util';
+import global from './global.json';
 
 const metadata = new Metadata();
 metadata.add('authentication', 'rpcadmin');
@@ -678,4 +679,43 @@ test('retrieves the consensus status from the node with correct types', async ()
             typeof consensusStatus.lastFinalizedBlockHeight === 'bigint'
         ).toBeTruthy(),
     ]);
+});
+
+test('Node is not living in the past', async () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const nodeInfo = await client.getNodeInfo();
+    expect(nodeInfo.currentLocaltime.getTime()).toBeGreaterThan(yesterday.getTime());
+});
+
+test('NodeInfo has fields', async () => {
+    const nodeInfo = await client.getNodeInfo();
+    expect(typeof nodeInfo.currentLocaltime).toEqual('object');
+    expect(typeof nodeInfo.nodeId).toEqual('string');
+    expect(typeof nodeInfo.peerType).toEqual('string');
+    expect(typeof nodeInfo.consensusType).toEqual('string');
+    expect(typeof nodeInfo.consensusBakerCommittee).toEqual('number');
+    expect(typeof nodeInfo.consensusBakerRunning).toEqual('boolean');
+    expect(typeof nodeInfo.consensusFinalizerCommittee).toEqual('boolean');
+    expect(typeof nodeInfo.consensusRunning).toEqual('boolean');
+});
+
+test('Cryptographic parameters have fields', async () => {
+    const blockHash = '4b39a13d326f422c76f12e20958a90a4af60a2b7e098b2a59d21d402fff44bfc';
+    const params = await client.getCryptographicParameters(blockHash);
+    expect(params).toBeTruthy();
+    if (!params) {
+        return false;
+    }
+    expect(params.v).toEqual(0);
+    expect(params.value.onChainCommitmentKey).toEqual(global.onChainCommitmentKey);
+    expect(params.value.genesisString).toEqual(global.genesisString);
+    expect(params.value.bulletproofGenerators).toEqual(global.bulletproofGenerators);
+});
+
+test('Cryptographic parameters for unknown block is undefined', async () => {
+    const unknownBlockHash =
+        'fd4915edca67b4e8f6521641a638a3abdbdd7934e4f2a9a52d8673861e2ebdd2';
+    const params = await client.getCryptographicParameters(unknownBlockHash);
+    return expect(params).toBeUndefined();
 });
