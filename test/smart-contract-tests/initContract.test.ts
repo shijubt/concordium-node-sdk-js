@@ -6,16 +6,15 @@ import {
     InitContractPayload,
     ParameterType,
     SMParameter,
-    SMStruct,
-} from '../src/types';
+} from '../../src/types';
 import * as ed from 'noble-ed25519';
-import { getAccountTransactionSignDigest } from '../src/serialization';
-import { getNodeClient } from './testHelpers';
-import { AccountAddress } from '../src/types/accountAddress';
-import { GtuAmount } from '../src/types/gtuAmount';
-import { TransactionExpiry } from '../src/types/transactionExpiry';
+import { getAccountTransactionSignDigest } from '../../src/serialization';
+import { getNodeClient } from '../testHelpers';
+import { AccountAddress } from '../../src/types/accountAddress';
+import { GtuAmount } from '../../src/types/gtuAmount';
+import { TransactionExpiry } from '../../src/types/transactionExpiry';
 import { Buffer } from 'buffer/';
-import { ModuleReference } from '../src/types/moduleReference';
+import { ModuleReference } from '../../src/types/moduleReference';
 const client = getNodeClient();
 const senderAccountAddress =
     '4ZJBYQbVp3zVZyjCXfZAAYBVkJMyVj8UKUNj9ox5YqTCBdBq2M';
@@ -35,32 +34,23 @@ test('init contract with the wrong private key', async () => {
         sender: new AccountAddress(senderAccountAddress),
     };
 
-    const contractName = 'INDBankStruct';
+    const contractName = 'INDBank';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const inputParams: SMParameter<SMStruct> = {
-        type: ParameterType.Struct,
-        value: [
-            {
-                type: ParameterType.U8,
-                value: 50,
-            } as SMParameter<number>,
-            {
-                type: ParameterType.U8,
-                value: 51,
-            } as SMParameter<number>,
-        ] as SMStruct,
+    const params: SMParameter<undefined> = {
+        type: ParameterType.NoParameters,
+        value: undefined,
     };
-    const baseEnergy = 300000n;
+    const maxContractExecutionEnergy = 300000n;
 
     const initModule: InitContractPayload = {
         amount: new GtuAmount(0n),
         moduleRef: new ModuleReference(
-            '2981fc5db0144ed7824c7f591c7d0dac95b0431bc009c1dd2d42013fc0532931'
+            'e51d9f9329f103faa18b1c99335281204df9e3eec23d7138f69ddd17fd63e9d0'
         ),
         contractName: contractName,
-        parameter: inputParams,
-        maxContractExecutionEnergy: baseEnergy,
-    } as InitContractPayload;
+        parameter: params,
+        maxContractExecutionEnergy: maxContractExecutionEnergy,
+    };
 
     const initContractTransaction: AccountTransaction = {
         header: header,

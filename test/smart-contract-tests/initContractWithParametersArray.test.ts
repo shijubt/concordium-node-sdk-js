@@ -7,15 +7,15 @@ import {
     ParameterType,
     SMParameter,
     SMStruct,
-} from '../src/types';
+} from '../../src/types';
 import * as ed from 'noble-ed25519';
-import { getAccountTransactionSignDigest } from '../src/serialization';
-import { getNodeClient } from './testHelpers';
-import { AccountAddress } from '../src/types/accountAddress';
-import { GtuAmount } from '../src/types/gtuAmount';
-import { TransactionExpiry } from '../src/types/transactionExpiry';
+import { getAccountTransactionSignDigest } from '../../src/serialization';
+import { getNodeClient } from '../testHelpers';
+import { AccountAddress } from '../../src/types/accountAddress';
+import { GtuAmount } from '../../src/types/gtuAmount';
+import { TransactionExpiry } from '../../src/types/transactionExpiry';
 import { Buffer } from 'buffer/';
-import { ModuleReference } from '../src/types/moduleReference';
+import { ModuleReference } from '../../src/types/moduleReference';
 const client = getNodeClient();
 const senderAccountAddress =
     '4ZJBYQbVp3zVZyjCXfZAAYBVkJMyVj8UKUNj9ox5YqTCBdBq2M';
@@ -38,17 +38,21 @@ test('init contract with the wrong private key', async () => {
     const contractName = 'INDBankStruct1';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const inputParams: SMParameter<SMStruct> = {
-        type: ParameterType.Struct,
+        type: ParameterType.Array,
         value: [
             {
-                type: ParameterType.String,
-                value: 'strval',
-            } as SMParameter<string>,
+                type: ParameterType.U8,
+                value: 26,
+            } as SMParameter<number>,
             {
                 type: ParameterType.U8,
                 value: 27,
             } as SMParameter<number>,
-        ] as SMStruct,
+            {
+                type: ParameterType.U8,
+                value: 51,
+            } as SMParameter<number>,
+        ],
     };
     const baseEnergy = 300000n;
 
@@ -80,6 +84,7 @@ test('init contract with the wrong private key', async () => {
 
     const result = await client.sendAccountTransaction(
         initContractTransaction,
+
         signatures
     );
 
